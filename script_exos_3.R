@@ -22,3 +22,27 @@ compter_nombre_d_elus(df_Faverelles)
 compter_nombre_d_elus(df_Loire_Atlantique)
 compter_nombre_d_elus(df_Gers)
 
+# Correction Question 3
+compter_nb_elus <- function(df){
+  schema <- c("Code.du.département", "Libellé.du.département", "Code.de.la.collectivité.à.statut.particulier", "Libellé.de.la.collectivité.à.statut.particulier", "Code.de.la.commune", "Libellé.de.la.commune", "Nom.de.l.élu", "Prénom.de.l.élu", "Code.sexe", "Date.de.naissance", "Code.de.la.catégorie.socio.professionnelle", "Libellé.de.la.catégorie.socio.professionnelle", "Date.de.début.du.mandat", "Libellé.de.la.fonction", "Date.de.début.de.la.fonction", "Code.nationalité")
+  stopifnot(identical(colnames(df), schema))
+  
+  df |>
+    select(Nom.de.l.élu, Prénom.de.l.élu, Date.de.naissance) |>
+    distinct() |>
+    nrow()
+}
+
+sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), compter_nb_elus)
+
+# Question 4
+library(stringr)
+compter_nombre_d_adjoints <- function(df){
+  schema <- c("Code.du.département", "Libellé.du.département", "Code.de.la.collectivité.à.statut.particulier", "Libellé.de.la.collectivité.à.statut.particulier", "Code.de.la.commune", "Libellé.de.la.commune", "Nom.de.l.élu", "Prénom.de.l.élu", "Code.sexe", "Date.de.naissance", "Code.de.la.catégorie.socio.professionnelle", "Libellé.de.la.catégorie.socio.professionnelle", "Date.de.début.du.mandat", "Libellé.de.la.fonction", "Date.de.début.de.la.fonction", "Code.nationalité")
+  stopifnot(identical(colnames(df), schema))
+  
+    sum(str_detect(df$Libellé.de.la.fonction, "adjoint"))
+}
+
+sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), compter_nombre_d_adjoints)
+

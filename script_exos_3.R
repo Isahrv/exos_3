@@ -46,3 +46,21 @@ compter_nombre_d_adjoints <- function(df){
 
 sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), compter_nombre_d_adjoints)
 
+# Question 5
+
+validate_schema <- function(df){
+  schema <- c("Code.du.département", "Libellé.du.département", "Code.de.la.collectivité.à.statut.particulier", "Libellé.de.la.collectivité.à.statut.particulier", "Code.de.la.commune", "Libellé.de.la.commune", "Nom.de.l.élu", "Prénom.de.l.élu", "Code.sexe", "Date.de.naissance", "Code.de.la.catégorie.socio.professionnelle", "Libellé.de.la.catégorie.socio.professionnelle", "Date.de.début.du.mandat", "Libellé.de.la.fonction", "Date.de.début.de.la.fonction", "Code.nationalité")
+  stopifnot(identical(colnames(df), schema))
+}
+
+library(lubridate)
+trouver_l_elu_le_plus_age <- function(df){
+  validate_schema(df)
+
+  df |>
+    mutate(Date.de.naissance = dmy(Date.de.naissance))|>
+    slice(which.min(Date.de.naissance))|>
+    select(Nom.de.l.élu, Prénom.de.l.élu, Date.de.naissance)
+}
+
+sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), trouver_l_elu_le_plus_age)

@@ -82,5 +82,28 @@ calcul_distribution_age <- function(df) {
   return(quantiles)
 }
 
-
 sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), calcul_distribution_age)
+
+# Question 7
+
+library(dplyr)
+library(ggplot2)
+
+plot_code_professions <- function(df) {
+  validate_schema(df)
+  
+  df_counts <- df |> 
+    count(Code.de.la.catégorie.socio.professionnelle, name = "Nombre")
+  
+  bar_chart <- ggplot(df_counts, aes(x = reorder(Code.de.la.catégorie.socio.professionnelle, Nombre), y = Nombre)) +
+    geom_bar(stat = "identity", fill = "royalblue") +
+    coord_flip() + 
+    labs(title = "Nombre d'élus par code professionnel",
+         x = "Code professionnel",
+         y = "Nombre d'élus") +
+    theme_classic()
+  print(bar_chart)
+}
+
+sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), plot_code_professions)
+

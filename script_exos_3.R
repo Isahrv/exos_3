@@ -64,3 +64,23 @@ trouver_l_elu_le_plus_age <- function(df){
 }
 
 sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), trouver_l_elu_le_plus_age)
+
+# Question 6
+
+library(dplyr)
+library(lubridate)
+
+calcul_distribution_age <- function(df) {
+  validate_schema(df)
+  
+  df <- df |>  
+    mutate(Date.de.naissance = dmy(Date.de.naissance)) |>  
+    mutate(Age = as.numeric(difftime(Sys.Date(), Date.de.naissance, units = "days")) %/% 365)  # Pas besoin de `!!sym()`
+  
+  quantiles <- quantile(df$Age, probs = c(0, 0.25, 0.50, 0.75, 1), na.rm = TRUE)
+  
+  return(quantiles)
+}
+
+
+sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), calcul_distribution_age)

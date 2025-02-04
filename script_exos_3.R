@@ -107,3 +107,25 @@ plot_code_professions <- function(df) {
 
 sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), plot_code_professions)
 
+# Question 8
+
+class(df_Nantes) <- c("commune", class(df_Nantes))
+class(df_Faverelles) <- c("commune", class(df_Faverelles))
+print(class(df_Nantes))
+print(class(df_Faverelles))
+  
+summary <- function(df) {
+  UseMethod("summary")
+}
+
+summary.commune <- function(x) {
+  print(paste("Libellé de la commune :", unique(x$Libellé.de.la.commune)))
+  print(paste("Nombre d'élus dans la commune :", compter_nb_elus(x)))
+  print("Distribution de l'âge des élus de la commune :")
+  print(calcul_distribution_age(x))
+  print("Élu le plus âgé de la commune :")
+  print(trouver_l_elu_le_plus_age(x))
+}
+
+summary.commune(df_Nantes)
+summary.commune(df_Faverelles)

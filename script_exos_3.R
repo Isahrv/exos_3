@@ -54,13 +54,14 @@ validate_schema <- function(df){
 }
 
 library(lubridate)
-trouver_l_elu_le_plus_age <- function(df){
+trouver_l_elu_le_plus_age <- function(df) {
   validate_schema(df)
-
+  
   df |>
-    mutate(Date.de.naissance = dmy(Date.de.naissance))|>
-    slice(which.min(Date.de.naissance))|>
-    select(Nom.de.l.élu, Prénom.de.l.élu, Date.de.naissance)
+    mutate(Date.de.naissance = dmy(Date.de.naissance)) |>
+    mutate(Age = as.numeric(difftime(Sys.Date(), Date.de.naissance, units = "days")) %/% 365)|>
+  slice(which.max(Age)) |>
+  select(Nom.de.l.élu, Prénom.de.l.élu, Age) 
 }
 
 sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), trouver_l_elu_le_plus_age)
@@ -123,9 +124,85 @@ summary.commune <- function(x) {
   print(paste("Nombre d'élus dans la commune :", compter_nb_elus(x)))
   print("Distribution de l'âge des élus de la commune :")
   print(calcul_distribution_age(x))
-  print("Élu le plus âgé de la commune :")
+  print("Élu le/la plus âgé.e de la commune :")
   print(trouver_l_elu_le_plus_age(x))
 }
 
 summary.commune(df_Nantes)
 summary.commune(df_Faverelles)
+
+# Question 9
+
+class(df_Loire_Atlantique) <- c("departement", class(df_Loire_Atlantique))
+class(df_Gers) <- c("departement", class(df_Gers))
+print(class(df_Loire_Atlantique))
+print(class(df_Gers))
+
+compter_nb_commune <- function(df){
+  validate_schema(df)
+  
+  df |>
+    select(Libellé.de.la.commune) |>
+    distinct() |>
+    nrow()
+}
+
+sapply(list(df_Loire_Atlantique, df_Gers), compter_nb_commune)
+
+trouver_l_elu_le_plus_jeune <- function(df) {
+  validate_schema(df)
+  
+  df |>
+    mutate(Date.de.naissance = dmy(Date.de.naissance)) |>
+    mutate(Age = as.numeric(difftime(Sys.Date(), Date.de.naissance, units = "days")) %/% 365)|>
+    slice(which.min(Age)) |>
+    select(Nom.de.l.élu, Prénom.de.l.élu, Age) 
+}
+
+sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), trouver_l_elu_le_plus_jeune)
+
+
+summary.departement <- function(x) {
+  print(paste("Nom du département :", unique(x$Libellé.du.département)))
+  print(paste("Nombre de commune :", compter_nb_commune(x)))
+  print(paste("Nombre d'élus dans le département :", compter_nb_elus(x)))
+  print("Distribution de l'âge des élus du département :")
+  print(calcul_distribution_age(x))
+  
+  print("Élu(e) le/la plus âgé(e) du département :")
+  elu_plus_age <- trouver_l_elu_le_plus_age(x)
+  print(elu_plus_age)
+  print(paste("Commune de l'élu(e) le/la plus âgé(e) :", x$Libellé.de.la.commune[x$Nom.de.l.élu == elu_plus_age$Nom.de.l.élu & x$Prénom.de.l.élu == elu_plus_age$Prénom.de.l.élu]))
+  
+  print("Élu(e) le/la plus jeune du département :")
+  elu_plus_jeune <- trouver_l_elu_le_plus_jeune(x)
+  print(elu_plus_jeune)
+  print(paste("Commune de l'élu(e) le/la plus jeune :", x$Libellé.de.la.commune[x$Nom.de.l.élu == elu_plus_jeune$Nom.de.l.élu & x$Prénom.de.l.élu == elu_plus_jeune$Prénom.de.l.élu]))
+  
+  age <- x |> 
+    mutate(Date.de.naissance = dmy(Date.de.naissance)) |>
+    mutate(Age = as.numeric(difftime(Sys.Date(), Date.de.naissance, units = "days")) %/% 365)
+
+  moyenne_age_par_commune <- age |>
+    group_by(Libellé.de.la.commune) |>
+    summarise(Moyenne_Age = mean(Age, na.rm = TRUE), .groups = "drop")
+
+  commune_age_min <- moyenne_age_par_commune |>
+    slice(which.min(Moyenne_Age)) |>
+    pull(Libellé.de.la.commune)
+
+  commune_age_max <- moyenne_age_par_commune |>
+    slice(which.max(Moyenne_Age)) |>
+    pull(Libellé.de.la.commune)
+  
+  print(paste("Commune avec la moyenne d'âge la plus faible :", commune_age_min))
+  print("Distribution des âges pour cette commune :")
+  print(calcul_distribution_age(filter(x, Libellé.de.la.commune == commune_age_min)))
+  
+  print(paste("Commune avec la moyenne d'âge la plus élevée :", commune_age_max))
+  print("Distribution des âges pour cette commune :")
+  print(calcul_distribution_age(filter(x, Libellé.de.la.commune == commune_age_max)))
+}
+
+summary.departement(df_Loire_Atlantique)
+summary.departement(df_Gers)

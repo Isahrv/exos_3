@@ -270,5 +270,3 @@ plot.departement <- function(df) {
 }
 
 sapply(list(df_Loire_Atlantique, df_Gers), plot.departement)
-
-

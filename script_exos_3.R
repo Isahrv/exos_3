@@ -206,3 +206,46 @@ summary.departement <- function(x) {
 
 summary.departement(df_Loire_Atlantique)
 summary.departement(df_Gers)
+
+# Question 10
+
+library(dplyr)
+library(ggplot2)
+
+plot <- function(df) {
+  UseMethod("summary")
+}
+
+plot.commune <- function(df) {
+  validate_schema(df)
+  
+  df_counts <- df |> 
+    count(Code.de.la.catégorie.socio.professionnelle, name = "Nombre")
+  
+  nom_commune <- unique(df$Libellé.de.la.commune)
+  nom_departement <- unique(df$Libellé.du.département)
+  nb_elus <- sum(df_counts$Nombre)
+  
+  titre_graphique <- paste(nom_commune, "-", nom_departement)
+  axe_x <- paste("Libellés des codes professionnels pour les", nb_elus, "élus")
+  
+  bar_chart <- ggplot(df_counts, aes(x = reorder(Code.de.la.catégorie.socio.professionnelle, Nombre), y = Nombre)) +
+    geom_bar(stat = "identity", fill = "royalblue") +
+    coord_flip() + 
+    labs(title = titre_graphique,
+         x = axe_x,
+         y = "Nombre d'élus") +
+    theme_classic()
+  
+  print(bar_chart)
+}
+
+sapply(list(df_Nantes, df_Faverelles), plot.commune)
+
+# Question 11
+
+plot.departement <- function(df) {
+  
+}
+
+sapply(list(df_Loire_Atlantique, df_Gers), plot.departement)

@@ -245,7 +245,30 @@ sapply(list(df_Nantes, df_Faverelles), plot.commune)
 # Question 11
 
 plot.departement <- function(df) {
+  validate_schema(df)
   
+  df_counts <- df |> 
+    count(Code.de.la.catégorie.socio.professionnelle, name = "Nombre") |> 
+    arrange(desc(Nombre)) |> 
+    slice_head(n = 10)
+  
+  nom_departement <- unique(df$Libellé.du.département)
+  nb_communes <- length(unique(df$Libellé.de.la.commune))
+  
+  titre_graphique <- paste(nom_departement, "-", nb_communes, "communes")
+  axe_x_label <- paste("Libellés des 10 codes professionnels les plus représentés pour", nom_departement)
+  
+  bar_chart <- ggplot(df_counts, aes(x = reorder(Code.de.la.catégorie.socio.professionnelle, Nombre), y = Nombre)) +
+    geom_bar(stat = "identity", fill = "royalblue") +
+    coord_flip() + 
+    labs(title = titre_graphique,
+         x = axe_x_label,
+         y = "Nombre d'élus") +
+    theme_classic()
+  
+  print(bar_chart)
 }
 
 sapply(list(df_Loire_Atlantique, df_Gers), plot.departement)
+
+

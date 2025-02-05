@@ -60,6 +60,7 @@ sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), compter_nom
 
 # Question 5
 
+library(dplyr)
 library(lubridate)
 trouver_l_elu_le_plus_age <- function(df) {
   # Cette fonction prend un dataframe correspondant au schéma de validate_schema() en entrée et retourne le nom, le prénom et l'âge de l'élu le plus agé dans un département/une commune.
@@ -125,6 +126,9 @@ class(df_Faverelles) <- c("commune", class(df_Faverelles))
 print(class(df_Nantes))
 print(class(df_Faverelles))
   
+library(dplyr)
+library(lubridate)
+
 summary <- function(df) {
   # Cette fonction générique prend un dataframe en entrée et a comme objectif de retourner un résumé d'informations différent en fonction de la classe du df.
   UseMethod("summary")
@@ -150,6 +154,8 @@ class(df_Gers) <- c("departement", class(df_Gers))
 print(class(df_Loire_Atlantique))
 print(class(df_Gers))
 
+library(dplyr)
+
 compter_nb_commune <- function(df){
   # Cette fonction prend un dataframe sur un département, correspondant au schéma de validate_schema(), en entrée et retourne le nombre de commune dans un département.
   validate_schema(df)
@@ -162,6 +168,8 @@ compter_nb_commune <- function(df){
 
 sapply(list(df_Loire_Atlantique, df_Gers), compter_nb_commune)
 
+library(dplyr)
+library(lubridate)
 trouver_l_elu_le_plus_jeune <- function(df) {
   # Cette fonction prend un dataframe  correspondant au schéma de validate_schema() en entrée et retourne le nom, le prénom et l'âge de l'élu le plus jeune dans un département/une commune.
   validate_schema(df)
@@ -174,7 +182,6 @@ trouver_l_elu_le_plus_jeune <- function(df) {
 }
 
 sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), trouver_l_elu_le_plus_jeune)
-
 
 summary.departement <- function(x) {
   # Cette fonction prend un dataframe de classe "departement", correspondant au schéma de validate_schema(), en entrée et retourne un résumé d'informations sur un département.

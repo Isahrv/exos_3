@@ -1,5 +1,9 @@
 # Exercice répertoire national des élus
 
+# library(dplyr) pour distinct()
+# library(stringr) pour str_detect()
+
+
 # Question 2
 data_exercice <- read.table("~/cours/M1 ECAP/S2/R avancé & Git/data/elus-conseillers-municipaux-cm.csv", header = TRUE, sep = ";", quote = "")
 
@@ -11,6 +15,7 @@ df_Gers <- data_exercice[data_exercice$Libellé.du.département == "Gers",]
 # Question 3
 library(dplyr)
 compter_nombre_d_elus <- function(df){
+  # Cette fonction prend un dataframe correspondant au schéma en entrée et retourne le nombre d'élus par départements ou communes.
   unique_elus <- df |>
     count(Nom.de.l.élu, Prénom.de.l.élu, Date.de.naissance)
   nombre_elus <- sum(unique_elus$n)
@@ -23,9 +28,16 @@ compter_nombre_d_elus(df_Loire_Atlantique)
 compter_nombre_d_elus(df_Gers)
 
 # Correction Question 3
-compter_nb_elus <- function(df){
+validate_schema <- function(df){
+  # Cette fonction permet d'arrêter le code si jamais le df en entré ne correspond pas au schéma indiqué ci-dessous.
   schema <- c("Code.du.département", "Libellé.du.département", "Code.de.la.collectivité.à.statut.particulier", "Libellé.de.la.collectivité.à.statut.particulier", "Code.de.la.commune", "Libellé.de.la.commune", "Nom.de.l.élu", "Prénom.de.l.élu", "Code.sexe", "Date.de.naissance", "Code.de.la.catégorie.socio.professionnelle", "Libellé.de.la.catégorie.socio.professionnelle", "Date.de.début.du.mandat", "Libellé.de.la.fonction", "Date.de.début.de.la.fonction", "Code.nationalité")
   stopifnot(identical(colnames(df), schema))
+}
+
+library(dplyr)
+compter_nb_elus <- function(df){
+  # Cette fonction prend un dataframe correspondant au schéma de validate_schema() en entrée et retourne le nombre d'élus par départements ou communes.
+  validate_schema(df)
   
   df |>
     select(Nom.de.l.élu, Prénom.de.l.élu, Date.de.naissance) |>
@@ -38,8 +50,8 @@ sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), compter_nb_
 # Question 4
 library(stringr)
 compter_nombre_d_adjoints <- function(df){
-  schema <- c("Code.du.département", "Libellé.du.département", "Code.de.la.collectivité.à.statut.particulier", "Libellé.de.la.collectivité.à.statut.particulier", "Code.de.la.commune", "Libellé.de.la.commune", "Nom.de.l.élu", "Prénom.de.l.élu", "Code.sexe", "Date.de.naissance", "Code.de.la.catégorie.socio.professionnelle", "Libellé.de.la.catégorie.socio.professionnelle", "Date.de.début.du.mandat", "Libellé.de.la.fonction", "Date.de.début.de.la.fonction", "Code.nationalité")
-  stopifnot(identical(colnames(df), schema))
+  # Cette fonction prend un dataframe correspondant au schéma de validate_schema() en entrée et retourne le nombre d'adjoints par départements ou communes.
+  validate_schema(df)
   
     sum(str_detect(df$Libellé.de.la.fonction, "adjoint"))
 }
@@ -48,13 +60,9 @@ sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), compter_nom
 
 # Question 5
 
-validate_schema <- function(df){
-  schema <- c("Code.du.département", "Libellé.du.département", "Code.de.la.collectivité.à.statut.particulier", "Libellé.de.la.collectivité.à.statut.particulier", "Code.de.la.commune", "Libellé.de.la.commune", "Nom.de.l.élu", "Prénom.de.l.élu", "Code.sexe", "Date.de.naissance", "Code.de.la.catégorie.socio.professionnelle", "Libellé.de.la.catégorie.socio.professionnelle", "Date.de.début.du.mandat", "Libellé.de.la.fonction", "Date.de.début.de.la.fonction", "Code.nationalité")
-  stopifnot(identical(colnames(df), schema))
-}
-
 library(lubridate)
 trouver_l_elu_le_plus_age <- function(df) {
+  # Cette fonction prend un dataframe correspondant au schéma de validate_schema() en entrée et retourne le nom, le prénom et l'âge de l'élu le plus agé dans un département/une commune.
   validate_schema(df)
   
   df |>
@@ -72,11 +80,12 @@ library(dplyr)
 library(lubridate)
 
 calcul_distribution_age <- function(df) {
+  # Cette fonction prend un dataframe correspondant au schéma de validate_schema() en entrée et retourne la distribution de l'âge des élus dans un département/une commune.
   validate_schema(df)
   
   df <- df |>  
     mutate(Date.de.naissance = dmy(Date.de.naissance)) |>  
-    mutate(Age = as.numeric(difftime(Sys.Date(), Date.de.naissance, units = "days")) %/% 365)  # Pas besoin de `!!sym()`
+    mutate(Age = as.numeric(difftime(Sys.Date(), Date.de.naissance, units = "days")) %/% 365)
   
   quantiles <- quantile(df$Age, probs = c(0, 0.25, 0.50, 0.75, 1), na.rm = TRUE)
   
@@ -91,6 +100,7 @@ library(dplyr)
 library(ggplot2)
 
 plot_code_professions <- function(df) {
+  # Cette fonction prend un dataframe correspondant au schéma de validate_schema() en entrée et retourne un graphique montrant le nombre d'élus par code professionnel par départements/communes.
   validate_schema(df)
   
   df_counts <- df |> 
@@ -116,10 +126,12 @@ print(class(df_Nantes))
 print(class(df_Faverelles))
   
 summary <- function(df) {
+  # Cette fonction générique prend un dataframe en entrée et a comme objectif de retourner un résumé d'informations différent en fonction de la classe du df.
   UseMethod("summary")
 }
 
 summary.commune <- function(x) {
+  # Cette fonction prend un dataframe de classe "commune", correspondant au schéma de validate_schema(), en entrée et retourne un résumé d'informations sur une commune.
   print(paste("Libellé de la commune :", unique(x$Libellé.de.la.commune)))
   print(paste("Nombre d'élus dans la commune :", compter_nb_elus(x)))
   print("Distribution de l'âge des élus de la commune :")
@@ -139,6 +151,7 @@ print(class(df_Loire_Atlantique))
 print(class(df_Gers))
 
 compter_nb_commune <- function(df){
+  # Cette fonction prend un dataframe sur un département, correspondant au schéma de validate_schema(), en entrée et retourne le nombre de commune dans un département.
   validate_schema(df)
   
   df |>
@@ -150,6 +163,7 @@ compter_nb_commune <- function(df){
 sapply(list(df_Loire_Atlantique, df_Gers), compter_nb_commune)
 
 trouver_l_elu_le_plus_jeune <- function(df) {
+  # Cette fonction prend un dataframe  correspondant au schéma de validate_schema() en entrée et retourne le nom, le prénom et l'âge de l'élu le plus jeune dans un département/une commune.
   validate_schema(df)
   
   df |>
@@ -163,6 +177,7 @@ sapply(list(df_Nantes, df_Faverelles, df_Loire_Atlantique, df_Gers), trouver_l_e
 
 
 summary.departement <- function(x) {
+  # Cette fonction prend un dataframe de classe "departement", correspondant au schéma de validate_schema(), en entrée et retourne un résumé d'informations sur un département.
   print(paste("Nom du département :", unique(x$Libellé.du.département)))
   print(paste("Nombre de commune :", compter_nb_commune(x)))
   print(paste("Nombre d'élus dans le département :", compter_nb_elus(x)))
@@ -213,10 +228,12 @@ library(dplyr)
 library(ggplot2)
 
 plot <- function(df) {
-  UseMethod("summary")
+  # Cette fonction générique prend un dataframe en entrée et a comme objectif de retourner un graphique différent en fonction de la classe du df.
+  UseMethod("plot")
 }
 
 plot.commune <- function(df) {
+  # Cette fonction prend un dataframe de classe "commune", correspondant au schéma de validate_schema(), en entrée et retourne un graphique montrant la distribution d'élus par rapport aux codes professionnels.
   validate_schema(df)
   
   df_counts <- df |> 
@@ -245,6 +262,7 @@ sapply(list(df_Nantes, df_Faverelles), plot.commune)
 # Question 11
 
 plot.departement <- function(df) {
+  # Cette fonction prend un dataframe de classe "departement", correspondant au schéma de validate_schema(), en entrée et retourne un graphique montrant la distribution d'élus par rapport aux 10 codes professionnels les plus représentés dans le département.
   validate_schema(df)
   
   df_counts <- df |> 
